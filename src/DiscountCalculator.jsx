@@ -1,16 +1,6 @@
 import { useState } from "react";
 import "./DiscountCalculator.css";
 
-// Справочник категорий: ключ — id, значение — { label, discount }
-// discount хранится в процентах (число)
-const CATEGORIES = [
-  { id: "electronics", label: "Электроника", discount: 5 },
-  { id: "clothing",    label: "Одежда",      discount: 15 },
-  { id: "groceries",   label: "Продукты",    discount: 10 },
-  { id: "books",       label: "Книги",       discount: 20 },
-  { id: "other",       label: "Другое",      discount: 0 },
-];
-
 // Ставка НДС в долях (22%)
 const VAT_RATE = 0.22;
 
@@ -18,8 +8,8 @@ function DiscountCalculator() {
   // --- Состояние ---
   // Исходная цена, введённая пользователем (строка — для controlled input)
   const [price, setPrice] = useState("");
-  // ID выбранной категории
-  const [category, setCategory] = useState("electronics");
+  // Ручная скидка в процентах
+  const [discountPercent, setDiscountPercent] = useState(0);
   // Введённый промокод
   const [promoCode, setPromoCode] = useState("");
   // Признак того, что пользователь нажал «Рассчитать»
@@ -40,14 +30,13 @@ function DiscountCalculator() {
     }
   }
 
-// Изменение категории
-  function handleCategoryChange(e) {
-    setCategory(e.target.value);
-    setCalculated(false); // Категория изменилась — результаты устарели
-  }
-
   function handlePromoCodeChange(e) {
     setPromoCode(e.target.value);
+    setCalculated(false);
+  }
+
+  function handleDiscountChange(e) {
+    setDiscountPercent(Number(e.target.value));
     setCalculated(false);
   }
   // Нажатие кнопки «Рассчитать»
@@ -74,18 +63,15 @@ function DiscountCalculator() {
   // Сброс формы
   function handleReset() {
     setPrice("");
-    setCategory("electronics");
+    setDiscountPercent(0);
     setPromoCode("");
     setCalculated(false);
     setError("");
   }
   // --- Вычисления ---
-  // Находим объект выбранной категории
-  const selectedCategory = CATEGORIES.find((c) => c.id === category);
   // Все вычисления проводим только если calculated === true
   // и цена корректна
   const numPrice = parseFloat(price) || 0;
-  const discountPercent = selectedCategory ? selectedCategory.discount : 0;
   const discountAmount = calculated ? numPrice * (discountPercent / 100) : 0;
   const priceAfterDiscount = calculated ? numPrice - discountAmount : 0;
   const hasPromoCode = promoCode.trim().toUpperCase() === "WELCOME10";
@@ -136,23 +122,21 @@ function DiscountCalculator() {
         />
       </div>
 
- {/* Выбор категории */}
       <div className="field">
-        <label htmlFor="category" className="field__label">
-          Категория товара
+        <label htmlFor="discount" className="field__label">
+          Кастомная скидка: {discountPercent}%
         </label>
-        <select
-          id="category"
-          className="field__input field__select"
-          value={category}
-          onChange={handleCategoryChange}        >
-          {/* Генерируем <option> из справочника категорий */}
-          {CATEGORIES.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.label} — скидка {cat.discount}%
-            </option>
-          ))}
-        </select>
+        <input
+          id="discount"
+          type="range"
+          className="field__range"
+          min="0"
+          max="50"
+          step="1"
+          value={discountPercent}
+          onChange={handleDiscountChange}
+          aria-valuetext={`${discountPercent}%`}
+        />
       </div>
       {/* Кнопки */}
       <div className="actions">
@@ -175,7 +159,7 @@ function DiscountCalculator() {
               </tr>
               <tr>
                 <td>
-                  Скидка ({discountPercent}%, категория «{selectedCategory.label}»)
+                  Кастомная скидка ({discountPercent}%)
                 </td>
                 <td className="results__value results__value--discount">
                   −{formatRub(discountAmount)} ₽

@@ -58,6 +58,13 @@ calculator-title {
   padding-right: 32px;
 }
 
+.field__range {
+  width: 100%;
+  margin: 8px 0;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
 /* --- Текст ошибки --- */
 .field__error {
   margin-top: 4px;
