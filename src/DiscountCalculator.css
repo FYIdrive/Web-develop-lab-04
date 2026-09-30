@@ -168,3 +168,40 @@ calculator-title {
 .results__row--total .results__value {
   font-size: 19px;
   color: #2563eb;}
+
+.history {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.history__title {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.history__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.history__details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.history__total {
+  white-space: nowrap;
+}

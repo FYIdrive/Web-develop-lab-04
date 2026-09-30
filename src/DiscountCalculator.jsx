@@ -14,6 +14,8 @@ function DiscountCalculator() {
   const [includeVat, setIncludeVat] = useState(true);
   // Введённый промокод
   const [promoCode, setPromoCode] = useState("");
+  // История успешных расчётов
+  const [history, setHistory] = useState([]);
   // Признак того, что пользователь нажал «Рассчитать»
   // До первого нажатия результаты не показываем
   const [calculated, setCalculated] = useState(false);
@@ -63,6 +65,25 @@ function DiscountCalculator() {
       return;
     }
     // Валидация прошла — показываем результаты
+    const priceAfterDiscount = numPrice * (1 - discountPercent / 100);
+    const promoApplied = promoCode.trim().toUpperCase() === "WELCOME10";
+    const priceAfterAllDiscounts = promoApplied
+      ? priceAfterDiscount * 0.9
+      : priceAfterDiscount;
+    const vatAmount = includeVat ? priceAfterAllDiscounts * VAT_RATE : 0;
+
+    setHistory((currentHistory) => [
+      {
+        id: `${Date.now()}-${Math.random()}`,
+        timestamp: new Date().toLocaleString("ru-RU"),
+        price: numPrice,
+        discountPercent,
+        promoApplied,
+        includeVat,
+        total: priceAfterAllDiscounts + vatAmount,
+      },
+      ...currentHistory,
+    ]);
     setError("");
     setCalculated(true);
   }
@@ -223,6 +244,27 @@ function DiscountCalculator() {
             </tbody>
           </table>
         </div>
+      )}
+      {history.length > 0 && (
+        <section className="history" aria-labelledby="history-title">
+          <h3 id="history-title" className="history__title">
+            История расчётов
+          </h3>
+          <ol className="history__list">
+            {history.slice(0, 5).map((item) => (
+              <li className="history__item" key={item.id}>
+                <div className="history__details">
+                  <time>{item.timestamp}</time>
+                  <span>
+                    Цена {formatRub(item.price)} ₽, скидка {item.discountPercent}%
+                    {item.promoApplied ? ", WELCOME10" : ""}, {item.includeVat ? "с НДС" : "без НДС"}
+                  </span>
+                </div>
+                <strong className="history__total">{formatRub(item.total)} ₽</strong>
+              </li>
+            ))}
+          </ol>
+        </section>
       )}
     </div>  );}
 export default DiscountCalculator;
