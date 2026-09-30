@@ -20,11 +20,13 @@ function DiscountCalculator() {
   const [price, setPrice] = useState("");
   // ID выбранной категории
   const [category, setCategory] = useState("electronics");
+  // Введённый промокод
+  const [promoCode, setPromoCode] = useState("");
   // Признак того, что пользователь нажал «Рассчитать»
   // До первого нажатия результаты не показываем
   const [calculated, setCalculated] = useState(false);
   // Сообщение об ошибке валидации цены
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
   // --- Обработчики событий ---
   // Изменение цены: разрешаем только цифры и точку
   function handlePriceChange(e) {
@@ -42,6 +44,11 @@ function DiscountCalculator() {
   function handleCategoryChange(e) {
     setCategory(e.target.value);
     setCalculated(false); // Категория изменилась — результаты устарели
+  }
+
+  function handlePromoCodeChange(e) {
+    setPromoCode(e.target.value);
+    setCalculated(false);
   }
   // Нажатие кнопки «Рассчитать»
   function handleCalculate() {
@@ -68,6 +75,7 @@ function DiscountCalculator() {
   function handleReset() {
     setPrice("");
     setCategory("electronics");
+    setPromoCode("");
     setCalculated(false);
     setError("");
   }
@@ -80,8 +88,11 @@ function DiscountCalculator() {
   const discountPercent = selectedCategory ? selectedCategory.discount : 0;
   const discountAmount = calculated ? numPrice * (discountPercent / 100) : 0;
   const priceAfterDiscount = calculated ? numPrice - discountAmount : 0;
-  const vatAmount = calculated ? priceAfterDiscount * VAT_RATE : 0;
-  const total = calculated ? priceAfterDiscount + vatAmount : 0;
+  const hasPromoCode = promoCode.trim().toUpperCase() === "WELCOME10";
+  const promoDiscountAmount = calculated && hasPromoCode ? priceAfterDiscount * 0.1 : 0;
+  const priceAfterAllDiscounts = priceAfterDiscount - promoDiscountAmount;
+  const vatAmount = calculated ? priceAfterAllDiscounts * VAT_RATE : 0;
+  const total = calculated ? priceAfterAllDiscounts + vatAmount : 0;
   // Вспомогательная функция: форматирование в рублях
   function formatRub(value) {
     return value.toLocaleString("ru-RU", {
@@ -93,7 +104,7 @@ function DiscountCalculator() {
     return (
     <div className="calculator-wrapper">
       <h2 className="calculator-title">Калькулятор скидок</h2>
- 
+      
       {/* Поле ввода цены */}
       <div className="field">
         <label htmlFor="price" className="field__label">
@@ -110,6 +121,19 @@ function DiscountCalculator() {
         />
         {/* Показываем ошибку, если она есть */}
         {error && <span className="field__error">{error}</span>}
+      </div>
+      <div className="field">
+        <label htmlFor="promoCode" className="field__label">
+          Промокод
+        </label>
+        <input
+          id="promoCode"
+          type="text"
+          className="field__input"
+          value={promoCode}
+          onChange={handlePromoCodeChange}
+          placeholder="Введите промокод"
+        />
       </div>
 
  {/* Выбор категории */}
@@ -157,9 +181,17 @@ function DiscountCalculator() {
                   −{formatRub(discountAmount)} ₽
                 </td>
               </tr>
+              {hasPromoCode && (
+                <tr>
+                  <td>Промокод WELCOME10 (10%)</td>
+                  <td className="results__value results__value--discount">
+                    −{formatRub(promoDiscountAmount)} ₽
+                  </td>
+                </tr>
+              )}
               <tr>
-<td>Цена после скидки</td>
-                <td className="results__value">{formatRub(priceAfterDiscount)} ₽</td>
+                <td>Цена после скидок</td>
+                <td className="results__value">{formatRub(priceAfterAllDiscounts)} ₽</td>
               </tr>
               <tr>
                 <td>НДС (22%)</td>
@@ -174,7 +206,7 @@ function DiscountCalculator() {
         </div>
       )}
     </div>  );}
- export default DiscountCalculator;
+export default DiscountCalculator;
 
 
           
