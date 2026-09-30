@@ -65,6 +65,28 @@ calculator-title {
   cursor: pointer;
 }
 
+.vat-field {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.vat-options {
+  display: flex;
+  gap: 20px;
+}
+
+.vat-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.vat-option input {
+  accent-color: #3b82f6;
+}
+
 /* --- Текст ошибки --- */
 .field__error {
   margin-top: 4px;

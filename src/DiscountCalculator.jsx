@@ -10,6 +10,8 @@ function DiscountCalculator() {
   const [price, setPrice] = useState("");
   // Ручная скидка в процентах
   const [discountPercent, setDiscountPercent] = useState(0);
+  // Признак включения НДС в итог
+  const [includeVat, setIncludeVat] = useState(true);
   // Введённый промокод
   const [promoCode, setPromoCode] = useState("");
   // Признак того, что пользователь нажал «Рассчитать»
@@ -39,6 +41,11 @@ function DiscountCalculator() {
     setDiscountPercent(Number(e.target.value));
     setCalculated(false);
   }
+
+  function handleVatChange(e) {
+    setIncludeVat(e.target.value === "with");
+    setCalculated(false);
+  }
   // Нажатие кнопки «Рассчитать»
   function handleCalculate() {
     // Парсим цену в число
@@ -64,6 +71,7 @@ function DiscountCalculator() {
   function handleReset() {
     setPrice("");
     setDiscountPercent(0);
+    setIncludeVat(true);
     setPromoCode("");
     setCalculated(false);
     setError("");
@@ -77,7 +85,7 @@ function DiscountCalculator() {
   const hasPromoCode = promoCode.trim().toUpperCase() === "WELCOME10";
   const promoDiscountAmount = calculated && hasPromoCode ? priceAfterDiscount * 0.1 : 0;
   const priceAfterAllDiscounts = priceAfterDiscount - promoDiscountAmount;
-  const vatAmount = calculated ? priceAfterAllDiscounts * VAT_RATE : 0;
+  const vatAmount = calculated && includeVat ? priceAfterAllDiscounts * VAT_RATE : 0;
   const total = calculated ? priceAfterAllDiscounts + vatAmount : 0;
   // Вспомогательная функция: форматирование в рублях
   function formatRub(value) {
@@ -138,6 +146,31 @@ function DiscountCalculator() {
           aria-valuetext={`${discountPercent}%`}
         />
       </div>
+      <fieldset className="field vat-field">
+        <legend className="field__label">НДС</legend>
+        <div className="vat-options">
+          <label className="vat-option">
+            <input
+              type="radio"
+              name="vatMode"
+              value="with"
+              checked={includeVat}
+              onChange={handleVatChange}
+            />
+            <span>С НДС (22%)</span>
+          </label>
+          <label className="vat-option">
+            <input
+              type="radio"
+              name="vatMode"
+              value="without"
+              checked={!includeVat}
+              onChange={handleVatChange}
+            />
+            <span>Без НДС</span>
+          </label>
+        </div>
+      </fieldset>
       {/* Кнопки */}
       <div className="actions">
         <button type="button" className="btn btn--primary" onClick={handleCalculate}>
@@ -177,10 +210,12 @@ function DiscountCalculator() {
                 <td>Цена после скидок</td>
                 <td className="results__value">{formatRub(priceAfterAllDiscounts)} ₽</td>
               </tr>
-              <tr>
-                <td>НДС (22%)</td>
-                <td className="results__value">+{formatRub(vatAmount)} ₽</td>
-              </tr>
+              {includeVat && (
+                <tr>
+                  <td>НДС (22%)</td>
+                  <td className="results__value">+{formatRub(vatAmount)} ₽</td>
+                </tr>
+              )}
               <tr className="results__row--total">
                 <td>Итого к оплате</td>
                 <td className="results__value">{formatRub(total)} ₽</td>
